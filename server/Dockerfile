@@ -21,9 +21,9 @@ FROM node:22-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
+# Runtime harus self-contained. pnpm/Corepack hanya dibutuhkan pada build stages;
+# production startup tidak boleh bergantung pada registry npm atau Corepack cache user.
 RUN apk add --no-cache wget \
-  && corepack enable \
-  && corepack prepare pnpm@10.28.2 --activate \
   && mkdir -p /app/storage/sop-pdf \
   && chown -R node:node /app
 
@@ -38,4 +38,4 @@ COPY --from=builder --chown=node:node /app/package.json ./package.json
 
 USER node
 EXPOSE 3001
-CMD ["pnpm", "start:prod"]
+CMD ["node", "dist/src/main.js"]
